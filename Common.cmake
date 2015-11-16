@@ -11,6 +11,8 @@ set(PRIMARY_PROJECT_NAME ${LOCAL_PROJECT_NAME})
 option(INSTALL_DEVELOPMENT_${LOCAL_PROJECT_NAME} "Install development support include and libraries for external packages." OFF)
 mark_as_advanced(INSTALL_DEVELOPMENT_${LOCAL_PROJECT_NAME})
 
+#OPTION( BUILD_TESTING "tests" ON )
+
 set(ITK_VERSION_MAJOR 4 CACHE STRING "Choose the expected ITK major version to build DTIPrep (3 or 4).")
 # Set the possible values of ITK major version for cmake-gui
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")

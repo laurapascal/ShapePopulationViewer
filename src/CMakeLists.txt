@@ -121,13 +121,9 @@ SEMMacroBuildCLI(
     INSTALL_ARCHIVE_DESTINATION lib
 )
 
-
 # --- CTest -------------------------------------------------------------------------------
-set(BUILD_TESTING ON CACHE BOOL "Build, configure and copy testing files")
+#set(BUILD_TESTING ON CACHE BOOL "Build, configure and copy testing files")
 
 if( BUILD_TESTING )
-  include(CTest)
-#    add_subdirectory( Testing )
+  ADD_SUBDIRECTORY(Testing)
 endif()
-
-

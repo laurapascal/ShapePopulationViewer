@@ -1909,7 +1909,8 @@ vtkActor* ShapePopulationBase::creationSphereActor()
         }
         scalars->InsertTuple(i,RGB);
     }
-    polyData->GetPointData()->SetScalars(scalars);
+    polyData->GetPointData()->AddArray(scalars);
+    polyData->GetPointData()->SetActiveScalars("ColorByDirection");
 
     // Map of the downloaded figure
     vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -2097,6 +2098,7 @@ void ShapePopulationBase::ChangeView(int R, int A, int S,int x_ViewUp,int y_View
     double *coords  = firstRenderer->GetActiveCamera()->GetFocalPoint();
     double distance = firstRenderer->GetActiveCamera()->GetDistance();
     firstRenderer->GetActiveCamera()->SetPosition(coords[0]+R*distance,coords[1]+A*distance,coords[2]+S*distance);
+
 
     //setroll to .001, because it breaks on y axis if roll = 0
     firstRenderer->GetActiveCamera()->SetRoll(.001);
