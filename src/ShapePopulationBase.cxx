@@ -53,6 +53,30 @@ ShapePopulationBase::ShapePopulationBase()
     m_createTitleSphere.push_back(false);
     m_createTitleAxis.push_back(false);
 
+    for(int i = 0; i < 6; i++)
+    {
+        m_reverseAxisColor.push_back(false);
+    }
+
+
+    for(int i = 0; i < 6; i++)
+    {
+        for(int j = 0; j < 3; j++)
+        {
+            int l = ( i + 2 ) % 3;
+
+            m_colorAxis[i][j] = 0.5;
+            if(i < 3)
+            {
+                m_colorAxis[i][l] = 1.0;
+            }
+            else
+            {
+                m_colorAxis[i][l] = 0.0;
+            }
+        }
+    }
+
     
 }
 
@@ -704,15 +728,25 @@ void ShapePopulationBase::UpdateColorMapByDirection(const char * cmap,int index)
                 {
                     if(maximum != 0)
                     {
-                        RGB[k] = (127.5/maximum)*(vector->GetComponent(l,k)/norm) + 127.5;
+                        if(!m_reverseAxisColor[k]) RGB[k] = (127.5/maximum)*(vector->GetComponent(l,k)/norm) + 127.5;
+                        else RGB[k] = (-127.5/maximum)*(vector->GetComponent(l,k)/norm) + 127.5;
                     }
                     else
                     {
                         RGB[k] = 127.5;
                     }
                 }
-                else if((vector->GetComponent(l,k)/norm) < -maximum) RGB[k] = 0;
-                else if((vector->GetComponent(l,k)/norm) > maximum) RGB[k] = 255;
+                else if((vector->GetComponent(l,k)/norm) < -maximum)
+                {
+                    if(!m_reverseAxisColor[k]) RGB[k] = 0;
+                    else RGB[k] = 255;
+
+                }
+                else if((vector->GetComponent(l,k)/norm) > maximum)
+                {
+                    if(!m_reverseAxisColor[k]) RGB[k] = 255;
+                    else RGB[k] = 0;
+                }
             }
             scalars->InsertTuple(l,RGB);
         }
@@ -1897,16 +1931,45 @@ vtkActor* ShapePopulationBase::creationSphereActor()
         min[j] = vectXYZ[0];
         max[j] = vectXYZ[numPts-1];
     }
+
+    double maximum;
+    for(int j = 0; j < 3; j++)
+    {
+        if( j == 0 )
+        {
+            if( fabs(min[j]) > fabs(max[j]) ) maximum = fabs(min[j]);
+            else maximum = fabs(max[j]);
+        }
+        else
+        {
+            if( fabs(min[j]) > maximum ) maximum = fabs(min[j]);
+            if( fabs(max[j]) > maximum ) maximum = fabs(max[j]);
+        }
+    }
+
     // RGB scalar corresponding
     double RGB[3];
     for( vtkIdType i = 0; i < numPts; ++i )
     {
         polyData->GetPoint(i,p);
+
         for(int k = 0; k < 3; k++)
         {
-            if(max[k] != min[k]) RGB[k] = ((255/(max[k]-min[k]))*(p[k])-(255*min[k])/(max[k]-min[k]));
-            else if (max[k] != 0) RGB[k] = 255;
-            else if (max[k] == 0) RGB[k] = 0;
+            if(maximum != 0)
+            {
+                if(!m_reverseAxisColor[k])
+                {
+                    RGB[k] = (127.5/maximum)*(p[k]) + 127.5;
+                }
+                else
+                {
+                    RGB[k] = (-127.5/maximum)*(p[k]) + 127.5;
+                }
+            }
+            else
+            {
+                RGB[k] = 127.5;
+            }
         }
         scalars->InsertTuple(i,RGB);
     }
@@ -1956,12 +2019,12 @@ void ShapePopulationBase::creationSphereWidget(int index)
         actorAxisByDirection->GetZAxisCaptionActor2D()->GetCaptionTextProperty()->SetColor(m_labelColor);
 
         // color of axis
-        actorAxisByDirection->GetXAxisShaftProperty()->SetColor(1,0.5,0.5);
-        actorAxisByDirection->GetXAxisTipProperty()->SetColor(1,0.5,0.5);
-        actorAxisByDirection->GetYAxisShaftProperty()->SetColor(0.5,1,0.5);
-        actorAxisByDirection->GetYAxisTipProperty()->SetColor(0.5,1,0.5);
-        actorAxisByDirection->GetZAxisShaftProperty()->SetColor(0.5,0.5,1);
-        actorAxisByDirection->GetZAxisTipProperty()->SetColor(0.5,0.5,1);
+        actorAxisByDirection->GetXAxisShaftProperty()->SetColor(m_colorAxis[1]);
+        actorAxisByDirection->GetXAxisTipProperty()->SetColor(m_colorAxis[1]);
+        actorAxisByDirection->GetYAxisShaftProperty()->SetColor(m_colorAxis[2]);
+        actorAxisByDirection->GetYAxisTipProperty()->SetColor(m_colorAxis[2]);
+        actorAxisByDirection->GetZAxisShaftProperty()->SetColor(m_colorAxis[0]);
+        actorAxisByDirection->GetZAxisTipProperty()->SetColor(m_colorAxis[0]);
 
         vtkOrientationMarkerWidget* widgetAxisByDirection = vtkOrientationMarkerWidget::New();
         widgetAxisByDirection = m_widgetAxisByDirection[index];

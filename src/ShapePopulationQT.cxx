@@ -19,6 +19,7 @@ ShapePopulationQT::ShapePopulationQT()
     m_cameraDialog = new cameraDialogQT(this);
     m_backgroundDialog = new backgroundDialogQT(this);
     m_CSVloaderDialog = new CSVloaderQT(this);
+    m_reverseAxisColorDialog = new reverseAxisColorDialogQT(this);
     
     // GUI disable
     stackedWidget_ColorMapByMagnitude->show();
@@ -84,6 +85,7 @@ ShapePopulationQT::ShapePopulationQT()
     connect(actionDelete_All,SIGNAL(triggered()),this,SLOT(deleteAll()));
     connect(actionCameraConfig,SIGNAL(triggered()),this,SLOT(showCameraConfigWindow()));
     connect(actionBackgroundConfig,SIGNAL(triggered()),this,SLOT(showBackgroundConfigWindow()));
+    connect(pushButton_customizeColorMapByDirection,SIGNAL(clicked()),this,SLOT(showReverseAxisColorConfigWindow()));
     connect(actionLoad_Colorbar,SIGNAL(triggered()),this,SLOT(loadColorMap()));
     connect(actionSave_Colorbar,SIGNAL(triggered()),this,SLOT(saveColorMap()));
 #ifndef SPV_EXTENSION
@@ -103,7 +105,12 @@ ShapePopulationQT::ShapePopulationQT()
     connect(m_backgroundDialog,SIGNAL(sig_selectedColor_valueChanged(QColor)), this, SLOT(slot_selectedColor_valueChanged(QColor)));
     connect(m_backgroundDialog,SIGNAL(sig_unselectedColor_valueChanged(QColor)), this, SLOT(slot_unselectedColor_valueChanged(QColor)));
     connect(m_backgroundDialog,SIGNAL(sig_textColor_valueChanged(QColor)), this, SLOT(slot_textColor_valueChanged(QColor)));
-    
+
+    // reverse color axis
+    connect(m_reverseAxisColorDialog,SIGNAL(sig_reverseXAxisColor_valueChanged(bool)), this, SLOT(slot_reverseXAxisColor_valueChanged(bool)));
+    connect(m_reverseAxisColorDialog,SIGNAL(sig_reverseYAxisColor_valueChanged(bool)), this, SLOT(slot_reverseYAxisColor_valueChanged(bool)));
+    connect(m_reverseAxisColorDialog,SIGNAL(sig_reverseZAxisColor_valueChanged(bool)), this, SLOT(slot_reverseZAxisColor_valueChanged(bool)));
+
     //cameraDialog signals
     connect(this,SIGNAL(sig_updateCameraConfig(cameraConfigStruct)), m_cameraDialog, SLOT(updateCameraConfig(cameraConfigStruct)));
     connect(m_cameraDialog,SIGNAL(sig_newCameraConfig(cameraConfigStruct)), this, SLOT(slot_newCameraConfig(cameraConfigStruct)));
@@ -140,6 +147,7 @@ ShapePopulationQT::~ShapePopulationQT()
     delete m_cameraDialog;
     delete m_backgroundDialog;
     delete m_CSVloaderDialog;
+    delete m_reverseAxisColorDialog;
 }
 
 void ShapePopulationQT::slotExit()
@@ -626,6 +634,123 @@ void ShapePopulationQT::slot_textColor_valueChanged(QColor color)
     
 }
 
+// * ///////////////////////////////////////////////////////////////////////////////////////////// * //
+// *                        FUNCTIONS FOR CUSTOMIZE COLOR MAP BY DIRECTION                         * //
+// * ///////////////////////////////////////////////////////////////////////////////////////////// * //
+
+void ShapePopulationQT::showReverseAxisColorConfigWindow()
+{
+    m_reverseAxisColorDialog->show();
+    m_reverseAxisColorDialog->AxisColor();
+}
+
+void ShapePopulationQT::slot_reverseXAxisColor_valueChanged(bool checked)
+{
+    // reverse color
+    double colorTemp[3];
+    for(int j = 0; j < 3; j++)
+    {
+        colorTemp[j] = m_colorAxis[1][j];
+        m_colorAxis[1][j] = m_colorAxis[4][j];
+        m_colorAxis[4][j] = colorTemp[j];
+    }
+
+    // update the reference
+    if(checked) m_reverseAxisColor[0] = true;
+    else m_reverseAxisColor[0] = false;
+    for(unsigned int i = 0; i < m_selectedIndex.size() ; i++)
+    {
+        deleteSphereWidget(i);
+        creationSphereWidget(i);
+    }
+
+    // update color map
+    for(unsigned int j = 0 ; j < m_commonAttributes.size() ; j++)
+    {
+        int dimension = m_meshList[0]->GetPolyData()->GetPointData()->GetScalars(m_commonAttributes[j].c_str())->GetNumberOfComponents();
+        if (dimension == 3 )
+        {
+            UpdateColorMapByDirection(m_commonAttributes[j].c_str(),j);
+        }
+    }
+    for(unsigned int l = 0; l < m_windowsList.size(); l++)
+    {
+        if(m_displayVectorsByAbsoluteDirection[l] || m_displayVectorsByDirection[l]) this->UpdateVectorsByDirection();
+        m_windowsList[l]->Render();
+    }
+}
+
+void ShapePopulationQT::slot_reverseYAxisColor_valueChanged(bool checked)
+{
+    // reverse color
+    double colorTemp[3];
+    for(int j = 0; j < 3; j++)
+    {
+        colorTemp[j] = m_colorAxis[2][j];
+        m_colorAxis[2][j] = m_colorAxis[5][j];
+        m_colorAxis[5][j] = colorTemp[j];
+    }
+
+    // update the reference
+    if(checked) m_reverseAxisColor[1] = true;
+    else m_reverseAxisColor[1] = false;
+    for(unsigned int i = 0; i < m_selectedIndex.size() ; i++)
+    {
+        deleteSphereWidget(i);
+        creationSphereWidget(i);
+    }
+
+    // update color map
+    for(unsigned int j = 0 ; j < m_commonAttributes.size() ; j++)
+    {
+        int dimension = m_meshList[0]->GetPolyData()->GetPointData()->GetScalars(m_commonAttributes[j].c_str())->GetNumberOfComponents();
+        if (dimension == 3 )
+        {
+            UpdateColorMapByDirection(m_commonAttributes[j].c_str(),j);
+        }
+    }
+    for(unsigned int l = 0; l < m_windowsList.size(); l++)
+    {
+        if(m_displayVectorsByAbsoluteDirection[l] || m_displayVectorsByDirection[l]) this->UpdateVectorsByDirection();
+        m_windowsList[l]->Render();
+    }
+}
+
+void ShapePopulationQT::slot_reverseZAxisColor_valueChanged(bool checked)
+{
+    // reverse color
+    double colorTemp[3];
+    for(int j = 0; j < 3; j++)
+    {
+        colorTemp[j] = m_colorAxis[0][j];
+        m_colorAxis[0][j] = m_colorAxis[3][j];
+        m_colorAxis[3][j] = colorTemp[j];
+    }
+
+    // update the reference
+    if(checked) m_reverseAxisColor[2] = true;
+    else m_reverseAxisColor[2] = false;
+    for(unsigned int i = 0; i < m_selectedIndex.size() ; i++)
+    {
+        deleteSphereWidget(i);
+        creationSphereWidget(i);
+    }
+
+    // update color map
+    for(unsigned int j = 0 ; j < m_commonAttributes.size() ; j++)
+    {
+        int dimension = m_meshList[0]->GetPolyData()->GetPointData()->GetScalars(m_commonAttributes[j].c_str())->GetNumberOfComponents();
+        if (dimension == 3 )
+        {
+            UpdateColorMapByDirection(m_commonAttributes[j].c_str(),j);
+        }
+    }
+    for(unsigned int l = 0; l < m_windowsList.size(); l++)
+    {
+        if(m_displayVectorsByAbsoluteDirection[l] || m_displayVectorsByDirection[l]) this->UpdateVectorsByDirection();
+        m_windowsList[l]->Render();
+    }
+}
 // * ///////////////////////////////////////////////////////////////////////////////////////////// * //
 // *                                       CAMERA FUNCTIONS                                        * //
 // * ///////////////////////////////////////////////////////////////////////////////////////////// * //
@@ -2618,6 +2743,8 @@ void ShapePopulationQT::on_checkBox_displayAbsoluteColorMapByDirection_toggled(b
 
     if(!checked) // color map by direction
     {
+        pushButton_customizeColorMapByDirection->show();
+
         m_usedRangeColorByDirection = m_RangeColorByDirectionList[index];
 
         // spin-boxes
@@ -2654,6 +2781,8 @@ void ShapePopulationQT::on_checkBox_displayAbsoluteColorMapByDirection_toggled(b
     }
     else if(!m_displayColorMapByMagnitude[m_selectedIndex[0]]) // color map by absolute direction
     {
+        pushButton_customizeColorMapByDirection->hide();
+
         m_usedRangeColorByAbsDirection = m_RangeColorByAbsDirectionList[index];
 
         // spin-boxes

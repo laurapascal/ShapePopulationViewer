@@ -7,6 +7,7 @@
 #include "gradientWidgetQT.h"
 #include "cameraDialogQT.h"
 #include "backgroundDialogQT.h"
+#include "reverseAxisColorDialogQT.h"
 #include "CSVloaderQT.h"
 #include <iostream>
 #include <vtkInteractorStyleTrackballCamera.h>
@@ -63,6 +64,7 @@ protected:
     std::vector<QVTKWidget *> m_widgetList;
     cameraDialogQT * m_cameraDialog;
     backgroundDialogQT * m_backgroundDialog;
+    reverseAxisColorDialogQT * m_reverseAxisColorDialog;
     CSVloaderQT * m_CSVloaderDialog;
 
     void CreateWidgets();
@@ -114,6 +116,7 @@ protected:
     void showBackgroundConfigWindow();
     void loadColorMap();
     void saveColorMap();
+    void showReverseAxisColorConfigWindow();
     
     //DISPLAY INFO RANGE
     void on_tabWidget_currentChanged(int index);
@@ -151,6 +154,11 @@ protected:
     void slot_unselectedColor_valueChanged(QColor color);
     void slot_textColor_valueChanged(QColor color);
     
+    // REVERSE AXIS COLOR
+    void slot_reverseXAxisColor_valueChanged(bool checked);
+    void slot_reverseYAxisColor_valueChanged(bool checked);
+    void slot_reverseZAxisColor_valueChanged(bool checked);
+
     //CAMERA CONFIG
     void slot_position_x_valueChanged(double arg1);
     void slot_position_y_valueChanged(double arg1);

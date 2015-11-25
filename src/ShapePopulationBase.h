@@ -93,6 +93,8 @@ class ShapePopulationBase
     std::vector< vtkOrientationMarkerWidget* > m_widgetSphere;
     std::vector< vtkOrientationMarkerWidget* > m_widgetTitleSphere;
     std::vector< vtkOrientationMarkerWidget* > m_widgetAxisByDirection;
+    double m_colorAxis[6][3];
+    std::vector<bool> m_reverseAxisColor;
 
 
     void CreateNewWindow(std::string a_filePath);
