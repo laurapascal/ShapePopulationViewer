@@ -223,7 +223,8 @@ void ShapePopulationQT::loadVTKDirCLP(QDir vtkDir)
 void ShapePopulationQT::loadColorMapCLP(std::string a_filePath)
 {
     QString QFilePath(a_filePath.c_str());
-    gradientWidget_VISU->loadColorPointList(QFilePath, &m_usedColorBar->colorPointList);
+    std::string currentAttribute = this->comboBox_VISU_attribute->currentText().toStdString();
+    gradientWidget_VISU->loadColorPointList(QFilePath, m_colorBarList, m_commonAttributes, currentAttribute);
     
     this->updateColorbar_QT();
 }
@@ -895,8 +896,9 @@ void ShapePopulationQT::loadColorMap()
     
     QFileInfo file(filename);
     m_colormapDirectory= file.path();
-    gradientWidget_VISU->loadColorPointList(filename, &m_usedColorBar->colorPointList);
-    
+    std::string currentAttribute = this->comboBox_VISU_attribute->currentText().toStdString();
+    gradientWidget_VISU->loadColorPointList(filename, m_colorBarList, m_commonAttributes, currentAttribute);
+
     this->updateColorbar_QT();
 }
 
@@ -907,9 +909,10 @@ void ShapePopulationQT::saveColorMap()
     if(filename == "") return;
     
     QFileInfo file(filename);
+    QString attribute = this->comboBox_VISU_attribute->currentText();
     m_colormapDirectory= file.path();
     if(file.suffix() != QString("spvcm")) filename += ".spvcm";
-    gradientWidget_VISU->saveColorPointList(filename);
+    gradientWidget_VISU->saveColorPointList(filename, attribute);
 }
 
 void ShapePopulationQT::showCustomizeColorMapByDirectionConfigWindow()

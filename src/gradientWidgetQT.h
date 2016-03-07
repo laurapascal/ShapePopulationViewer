@@ -31,10 +31,12 @@
 #include <QXmlStreamReader>
 #include <QMessageBox>
 #include <sstream>
+#include <iostream>
 
 // solution includes
 #include "gradientArrow.h"
 #include "colorPointStruct.h"
+#include "colorBarStruct.h"
 
 
 class gradientWidgetQT : public QWidget
@@ -53,8 +55,8 @@ public:
     const QColor getFocusColor();
     qreal getFocusPosition();
 
-    void saveColorPointList(QString a_filePath);
-    void loadColorPointList(QString a_filePath, std::vector<colorPointStruct> * a_colorPointList);
+    void saveColorPointList(QString a_filePath, QString a_attribute);
+    void loadColorPointList(QString a_filePath, std::vector<colorBarStruct*> a_colorBarList, std::vector<std::string> a_commonAttributes, std::string currentAttribute);
     bool getXmlReaderValue(QXmlStreamReader * a_xmlReader, double * a_colorPointValue);
 
     void enable(std::vector<colorPointStruct> *a_colorPointList);

@@ -113,10 +113,11 @@ bool gradientWidgetQT::getXmlReaderValue(QXmlStreamReader * a_xmlReader, double 
     return true;
 }
 
-void gradientWidgetQT::loadColorPointList(QString a_filePath, std::vector<colorPointStruct> * a_colorPointList)
+void gradientWidgetQT::loadColorPointList(QString a_filePath, std::vector<colorBarStruct *> a_colorBarList, std::vector<std::string> a_commonAttributes, std::string currentAttribute)
 {
     QFile file(a_filePath);
-
+    int index = -1;
+    std::string attribute;
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         /* If we can't open it, let's show an error message. */
@@ -141,7 +142,16 @@ void gradientWidgetQT::loadColorPointList(QString a_filePath, std::vector<colorP
         if(token == QXmlStreamReader::StartElement)
         {
             /* If it's named colormap, we'll go to the next.*/
-            if(xmlReader.name() == "colormap") continue;
+            if(xmlReader.name() == "colormap")
+            {
+                QXmlStreamAttributes attributes = xmlReader.attributes();
+                attribute = attributes.value("attribute").toString().toStdString();
+                for(unsigned int i = 0; i < a_commonAttributes.size(); i++)
+                {
+                    if(a_commonAttributes[i] == attribute) index = i;
+                }
+                continue;
+            }
 
             /* If it's named colorpoint, we'll dig the information from there.*/
             if(xmlReader.name() == "colorpoint")
@@ -194,11 +204,14 @@ void gradientWidgetQT::loadColorPointList(QString a_filePath, std::vector<colorP
     xmlReader.clear();
 
     /* Load the colormap */
-    *a_colorPointList = colorPointList;
-    this->setAllColors(a_colorPointList);
+    if( index != -1 )
+    {
+        a_colorBarList[index]->colorPointList = colorPointList;
+        if(currentAttribute == attribute) this->setAllColors(&colorPointList);
+    }
 }
 
-void gradientWidgetQT::saveColorPointList(QString a_filePath)
+void gradientWidgetQT::saveColorPointList(QString a_filePath, QString a_attribute)
 {
     //Get ColorPointList
     std::vector<colorPointStruct> colorPointList;
@@ -231,6 +244,7 @@ void gradientWidgetQT::saveColorPointList(QString a_filePath)
             /* ColorMap */
             xmlWriter->writeStartElement("colormap");
             xmlWriter->writeAttribute("name", fileInfo.baseName());
+            xmlWriter->writeAttribute("attribute", a_attribute);
             strs.str(""); strs.clear();
             strs << colorPointList.size() ;
             str = strs.str();
