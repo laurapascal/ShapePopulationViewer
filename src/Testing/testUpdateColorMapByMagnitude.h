@@ -3,7 +3,7 @@
 
 
 #include "../src/ShapePopulationBase.h"
-#include <math.h>
+#include <cmath>
 
 class TestShapePopulationBase
 {
